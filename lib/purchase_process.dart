@@ -70,21 +70,14 @@ class _PurchaseProcessPageState extends State<PurchaseProcessPage> {
         'latitude': _currentPosition?.latitude,
         'longitude': _currentPosition?.longitude,
         'product': widget.product['name'],
-        'price': widget.product['price'],
+        'price': int.parse(widget.product['price']) * quantity,
         'quantity': quantity,
       }),
     );
 
     if (response.statusCode == 200) {
       print('Order data sent successfully!');
-
-      // Update local product data
-      setState(() {
-        widget.product['stock'] -= quantity;
-        widget.product['sold'] += quantity;
-      });
-
-      widget.onStockUpdate(widget.product['name'], widget.product['stock']);
+      return;
     } else {
       print('Failed to send order data.');
     }
@@ -112,9 +105,10 @@ class _PurchaseProcessPageState extends State<PurchaseProcessPage> {
 
   void _incrementQuantity() {
     setState(() {
-      if (quantity < widget.product['stock']) {
-        quantity++;
-      }
+      // if (quantity < widget.product['stock']) {
+      //   quantity++;
+      // }
+      quantity++;
     });
   }
 

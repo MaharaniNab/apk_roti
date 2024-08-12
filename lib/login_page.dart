@@ -7,6 +7,7 @@ import 'package:d_view/d_view.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_fonts/google_fonts.dart'; // Import GoogleFonts
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -52,9 +53,10 @@ class LoginPage extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            DView.textTitle(
+            Text(
               'Login',
-              color: Colors.black,
+              style: GoogleFonts.poppins(
+                  fontSize: 24, color: Colors.black), // Applying Poppins font
             ),
             DView.height(),
             TextField(
@@ -63,9 +65,11 @@ class LoginPage extends StatelessWidget {
               decoration: InputDecoration(
                 prefixIcon: Icon(FeatherIcons.logIn, size: 20.0),
                 labelText: 'Email',
+                labelStyle: GoogleFonts.poppins(), // Applying Poppins font
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(50.0)),
               ),
+              style: GoogleFonts.poppins(), // Applying Poppins font
             ),
             DView.height(),
             TextField(
@@ -74,9 +78,11 @@ class LoginPage extends StatelessWidget {
               decoration: InputDecoration(
                 prefixIcon: Icon(FeatherIcons.lock, size: 20.0),
                 labelText: 'Password',
+                labelStyle: GoogleFonts.poppins(), // Applying Poppins font
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(50)),
               ),
+              style: GoogleFonts.poppins(), // Applying Poppins font
             ),
             DView.height(),
             SizedBox(
@@ -85,7 +91,10 @@ class LoginPage extends StatelessWidget {
                 onPressed: () {
                   login(context);
                 },
-                child: Text("Login"),
+                child: Text(
+                  "Login",
+                  style: GoogleFonts.poppins(), // Applying Poppins font
+                ),
               ),
             ),
             DView.height(),
@@ -100,7 +109,10 @@ class LoginPage extends StatelessWidget {
                     ),
                   );
                 },
-                child: Text("Register"),
+                child: Text(
+                  "Register",
+                  style: GoogleFonts.poppins(), // Applying Poppins font
+                ),
               ),
             ),
             DView.height(),
@@ -115,7 +127,10 @@ class LoginPage extends StatelessWidget {
                     ),
                   );
                 },
-                child: Text("Login as Admin"),
+                child: Text(
+                  "Login as Admin",
+                  style: GoogleFonts.poppins(), // Applying Poppins font
+                ),
               ),
             ),
           ],

@@ -1,10 +1,10 @@
 import 'dart:convert';
-
 import 'package:d_info/d_info.dart';
 import 'package:d_view/d_view.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_fonts/google_fonts.dart'; // Import GoogleFonts
 
 class RegisterPage extends StatelessWidget {
   RegisterPage({super.key});
@@ -41,46 +41,51 @@ class RegisterPage extends StatelessWidget {
             ClipOval(
               child: Image.network(
                 "https://t3.ftcdn.net/jpg/02/11/40/60/360_F_211406021_UQZROEmT39lpI8ThPudBOEB0BrN4P8oj.jpg",
-                width: 300 /
-                    3, // Mengatur lebar gambar menjadi 1/3 dari sebelumnya
-                height: 300 /
-                    3, // Mengatur tinggi gambar menjadi 1/3 dari sebelumnya
-                fit: BoxFit
-                    .cover, // Agar gambar memenuhi area dan tetap proporsional
+                width: 300 / 3,
+                height: 300 / 3,
+                fit: BoxFit.cover,
               ),
             ),
-            DView.textTitle(
+            Text(
               'Register',
-              color: Colors.black,
+              style: GoogleFonts.poppins(
+                  fontSize: 24, color: Colors.black), // Applying Poppins font
             ),
             DView.height(),
             TextField(
               controller: controllerUsername,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                prefixIcon: Icon(FeatherIcons.logIn, size: 20.0),
+                prefixIcon: Icon(FeatherIcons.logIn, size: 16.0),
                 labelText: 'Email',
+                labelStyle: GoogleFonts.poppins(), // Applying Poppins font
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(50.0)),
               ),
+              style: GoogleFonts.poppins(), // Applying Poppins font
             ),
             DView.height(),
             TextField(
               controller: controllerPassword,
               obscureText: true,
               decoration: InputDecoration(
-                prefixIcon: Icon(FeatherIcons.lock, size: 20.0),
+                prefixIcon: Icon(FeatherIcons.lock, size: 16.0),
                 labelText: 'Password',
+                labelStyle: GoogleFonts.poppins(), // Applying Poppins font
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(50)),
               ),
+              style: GoogleFonts.poppins(), // Applying Poppins font
             ),
             DView.height(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => register(context),
-                child: const Text('Register'),
+                child: Text(
+                  'Register',
+                  style: GoogleFonts.poppins(), // Applying Poppins font
+                ),
               ),
             ),
             DView.height(),
@@ -90,7 +95,10 @@ class RegisterPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: Text('Login'),
+                child: Text(
+                  'Login',
+                  style: GoogleFonts.poppins(), // Applying Poppins font
+                ),
               ),
             ),
           ],
