@@ -1,7 +1,11 @@
+import 'dart:io'; // Perlu untuk mendeteksi platform
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:geolocator/geolocator.dart';
 
 class AdminPage extends StatefulWidget {
   @override
@@ -10,11 +14,22 @@ class AdminPage extends StatefulWidget {
 
 class _AdminPageState extends State<AdminPage> {
   List<Map<String, dynamic>> transactions = [];
+  Position? position;
 
   @override
   void initState() {
     super.initState();
     _fetchTransactions();
+    _getLastKnownPosition();
+  }
+
+  Future<void> _getLastKnownPosition() async {
+    try {
+      position = await Geolocator.getLastKnownPosition();
+      // Optionally, use position here or set state
+    } catch (e) {
+      print('Error getting last known position: $e');
+    }
   }
 
   Future<void> _fetchTransactions() async {
@@ -105,6 +120,21 @@ class _AdminPageState extends State<AdminPage> {
                     color: Colors.brown[700],
                   ),
                 ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () => _openMap(
+                      transaction['latitude'],
+                      transaction['longitude'],
+                      transaction['name'],
+                      transaction['address']),
+                  child: Text(
+                    'View on Map',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -124,6 +154,38 @@ class _AdminPageState extends State<AdminPage> {
         );
       },
     );
+  }
+
+  void _openMap(
+      String latitude, String longitude, String name, String address) {
+    double lat = double.parse(latitude);
+    double lon = double.parse(longitude);
+
+    if (Platform.isWindows) {
+      // Untuk Windows, buka Google Maps di browser
+      final String googleMapsUrl = 'https://www.google.com/maps?q=$lat,$lon';
+      _launchURL(googleMapsUrl);
+    } else {
+      // Untuk platform lain, tampilkan peta di aplikasi
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => MapScreen(
+            latitude: lat,
+            longitude: lon,
+            customerName: name,
+            customerAddress: address,
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   @override
@@ -213,5 +275,99 @@ class _AdminPageState extends State<AdminPage> {
               ),
       ),
     );
+  }
+}
+
+
+class MapScreen extends StatelessWidget {
+  final double latitude;
+  final double longitude;
+  final String customerName;
+  final String customerAddress;
+
+  MapScreen({
+    required this.latitude,
+    required this.longitude,
+    required this.customerName,
+    required this.customerAddress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final LatLng location = LatLng(latitude, longitude);
+
+    final Marker marker = Marker(
+      markerId: MarkerId('marker_$customerName'), // Menggunakan nama customer sebagai ID
+      position: location,
+      infoWindow: InfoWindow(
+        title: customerName, // Menampilkan nama customer
+        snippet: customerAddress, // Menampilkan alamat customer
+        onTap: () {
+          // Opsional: Aksi saat InfoWindow di-tap
+          print('InfoWindow tapped');
+        },
+      ),
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Lokasi Pembeli'), // Judul pada AppBar
+      ),
+      body: Stack(
+        children: [
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: location,
+              zoom: 15,
+            ),
+            markers: {marker},
+            onMapCreated: (GoogleMapController controller) {
+              // Opsional, Anda bisa menyimpan controller untuk digunakan di masa mendatang
+            },
+          ),
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: Container(
+              padding: EdgeInsets.all(10),
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Customer Name: $customerName',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Address: $customerAddress',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      final googleMapsUrl = 'https://www.google.com/maps?q=$latitude,$longitude';
+                      _launchURL(googleMapsUrl);
+                    },
+                    child: Text('Open in Google Maps'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

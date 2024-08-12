@@ -23,15 +23,51 @@ class _PurchaseProcessPageState extends State<PurchaseProcessPage> {
   Position? _currentPosition;
 
   Future<void> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Memeriksa apakah layanan lokasi diaktifkan
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Location services are disabled.')),
+      );
+      return;
+    }
+
+    // Memeriksa izin lokasi
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Location permissions are denied.')),
+        );
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'Location permissions are permanently denied, we cannot request permissions.')),
+      );
+      return;
+    }
+
+    // Jika izin diberikan, mendapatkan lokasi
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
       setState(() {
         _currentPosition = position;
       });
+      print('Current Position: $_currentPosition');
     } catch (e) {
+      print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to get current location')),
+        SnackBar(content: Text('Failed to get current location: $e')),
       );
     }
   }
@@ -42,15 +78,27 @@ class _PurchaseProcessPageState extends State<PurchaseProcessPage> {
 
     final response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      final List<dynamic> products = json.decode(response.body);
-      final product =
-          products.firstWhere((p) => p['name'] == widget.product['name']);
+    // Menampilkan body response yang dikembalikan oleh server
+    print('Response body: ${response.body}');
 
-      setState(() {
-        widget.product['stock'] = product['stock'];
-        widget.product['sold'] = product['sold'];
-      });
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      // Menampilkan data yang telah di-decode
+      print('Parsed data: $data');
+
+      if (data['success'] == true) {
+        final List<dynamic> products = data['data'];
+        final product =
+            products.firstWhere((p) => p['name'] == widget.product['name']);
+
+        setState(() {
+          widget.product['stock'] = product['stock'];
+          widget.product['sold'] = product['sold'];
+        });
+      } else {
+        print('Failed to load product data: API response indicated failure.');
+      }
     } else {
       print('Failed to load product data.');
     }
@@ -105,9 +153,6 @@ class _PurchaseProcessPageState extends State<PurchaseProcessPage> {
 
   void _incrementQuantity() {
     setState(() {
-      // if (quantity < widget.product['stock']) {
-      //   quantity++;
-      // }
       quantity++;
     });
   }
